@@ -13,7 +13,22 @@ import octoprint.plugin
 
 class EventlogPlugin(octoprint.plugin.SettingsPlugin,
                      octoprint.plugin.AssetPlugin,
+		     octoprint.plugin.StartupPlugin,
+		     octoprint.plugin.ShutdownPlugin,
+		     octoprint.plugin.EventHandlerPlugin,
                      octoprint.plugin.TemplatePlugin):
+
+	def on_after_startup():
+		db = MySQLdb.connect(host="192.168.0.182",user="tools",passwd="tools",db="tools")
+		cur = db.cursor()
+
+	def on_shutdown():
+		cur.close()
+		db.close()
+
+	##~~ EventHandlerPlugin mixin
+	def on_event(event, payload):
+		cur.execute("INSERT INTO robo_events (event, payload) VALUES (%s, %s)", (event, payload))
 
 	##~~ SettingsPlugin mixin
 
